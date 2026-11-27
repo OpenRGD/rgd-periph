@@ -2,6 +2,7 @@
 use rgd_periph_core::*;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::HashSet;
 
 #[derive(Deserialize)]
 struct Corpus {
@@ -63,6 +64,8 @@ fn shared_managed_host_policy_vectors() {
     let wire: Value = serde_json::from_str(wire_json).unwrap();
     let corpus: Corpus = serde_json::from_str(policy_json).unwrap();
     assert_eq!(corpus.cases.len(), 32);
+    let ids: HashSet<_> = corpus.cases.iter().map(|case| &case.id).collect();
+    assert_eq!(ids.len(), corpus.cases.len());
     let descriptor: PeripheralDescriptor =
         serde_json::from_value(wire["documents"]["descriptor"].clone()).unwrap();
 

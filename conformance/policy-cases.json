@@ -289,7 +289,7 @@
       }
     },
     {
-      "id": "start-unknown",
+      "id": "start-unknown-lifecycle",
       "input": {
         "action": "acquisition.start",
         "robot_id": "conformance-robot",
@@ -460,7 +460,7 @@
       }
     },
     {
-      "id": "start-unknown",
+      "id": "start-unknown-device",
       "input": {
         "action": "acquisition.start",
         "robot_id": "conformance-robot",
