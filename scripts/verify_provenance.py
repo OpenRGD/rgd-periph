@@ -7,8 +7,9 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT = "3b55bca50570497f22f3eadab3752f0f3e8fada1"
 MANIFEST = "provenance/source-snapshot.json"
-# CLI is intentionally adapted in the following standalone commit.
-ADAPTED = {"services/peripheral-manager/control_cli.py"}
+# Explicitly adapted source files; original snapshot remains immutable.
+ADAPTED = {"services/peripheral-manager/control_cli.py",
+           "services/peripheral-manager/host_broker.py"}
 
 
 def blob_at(path):
@@ -38,7 +39,7 @@ def main():
         verify(blob_at(path), entry)
         if path not in ADAPTED:
             verify((ROOT / path).read_bytes(), entry)
-    print("PASS: 16 exact origin blobs, 15 unchanged working files; CLI adaptation explicitly recorded")
+    print(f"PASS: {len(entries)} exact origin blobs, {len(entries) - len(ADAPTED)} unchanged working files; explicit IPC adaptations")
 
 
 if __name__ == "__main__":

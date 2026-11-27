@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import argparse
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -42,6 +44,74 @@ SAFE_ID = re.compile(r"^[a-z][a-z0-9-]{0,79}$")
 UUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")
 VALID_ACTIONS = frozenset(("status", "acquisition.start", "acquisition.stop"))
 SUBPROCESS_TIMEOUT_SEC = 4
+READ_TIMEOUT_SEC = 2
+WRITE_TIMEOUT_SEC = 2
+# 2 initial probes + 1 operation + 2 final probes, plus IPC margin.
+CLIENT_TIMEOUT_SEC = 30
+
+
+def strict_json(raw: bytes):
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate_json_key")
+            result[key] = value
+        return result
+
+    def invalid_constant(_):
+        raise ValueError("nonfinite_json_constant")
+
+    def finite_float(value):
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError("nonfinite_json_number")
+        return number
+
+    return json.loads(raw.decode("utf-8"), object_pairs_hook=unique,
+                      parse_constant=invalid_constant, parse_float=finite_float)
+
+
+def remaining(deadline: float) -> float:
+    budget = deadline - time.monotonic()
+    if budget <= 0:
+        raise TimeoutError("ipc_deadline")
+    return budget
+
+
+def read_frame(conn: socket.socket, deadline: float) -> bytes:
+    data = bytearray()
+    while len(data) < MAX_MESSAGE:
+        conn.settimeout(remaining(deadline))
+        part = conn.recv(min(512, MAX_MESSAGE - len(data)))
+        if not part:
+            raise ValueError("incomplete_ipc_frame")
+        data.extend(part)
+        if b"\n" in part:
+            if data.count(b"\n") != 1 or not data.endswith(b"\n"):
+                raise ValueError("unexpected_trailing_frame")
+            return bytes(data)
+    raise ValueError("ipc_frame_too_large")
+
+
+def send_frame(conn: socket.socket, data: bytes, deadline: float) -> None:
+    if not data or len(data) > MAX_MESSAGE or not data.endswith(b"\n"):
+        raise ValueError("invalid_outgoing_frame")
+    conn.settimeout(remaining(deadline))
+    conn.sendall(data)
+
+
+def peer_can_receive(conn: socket.socket) -> bool:
+    # The local protocol uses one request per connection, no half-close.
+    # A known lost client is not a reason to dispatch a queued action.
+    try:
+        conn.setblocking(False)
+        conn.recv(1, socket.MSG_PEEK)
+    except BlockingIOError:
+        return True
+    except OSError:
+        return False
+    return False
 
 
 def utc_now() -> str:
@@ -55,10 +125,16 @@ def read_allowlist(path: Path, uid: int | None = None) -> dict:
     mode = path.stat()
     if not stat.S_ISREG(mode.st_mode) or mode.st_uid != uid or mode.st_mode & 0o077:
         raise ValueError("allowlist_owner_or_mode_invalid")
-    raw = path.read_bytes()
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, "rb") as stream:
+        actual = os.fstat(stream.fileno())
+        if (not stat.S_ISREG(actual.st_mode) or actual.st_uid != uid
+                or actual.st_mode & 0o077 or (actual.st_dev, actual.st_ino) != (mode.st_dev, mode.st_ino)):
+            raise ValueError("allowlist_changed")
+        raw = stream.read(16 * 1024 + 1)
     if len(raw) > 16 * 1024:
         raise ValueError("allowlist_too_large")
-    parsed = json.loads(raw)
+    parsed = strict_json(raw)
     if (not isinstance(parsed, dict)
             or set(parsed) != {"schema_version", "services"}
             or parsed["schema_version"] != ALLOWLIST_SCHEMA
@@ -74,6 +150,8 @@ def read_allowlist(path: Path, uid: int | None = None) -> dict:
                     "device_by_path", "usb_vid_pid", "resource_lock"}
         if not isinstance(row, dict) or set(row) != expected:
             raise ValueError("allowlist_service_shape")
+        if any(not isinstance(row[name], str) for name in expected):
+            raise ValueError("allowlist_field_type")
         if not SAFE_ID.fullmatch(row["robot_id"]) or not SAFE_ID.fullmatch(row["peripheral_id"]):
             raise ValueError("invalid_peripheral_identity")
         if not SAFE_UNIT.fullmatch(row["service_ref"]):
@@ -154,7 +232,7 @@ def device_identity(row: dict, runner=subprocess.run) -> tuple[str, bool]:
         return "present", False
 
 
-def run_unit(action: str, unit: str, runner=subprocess.run) -> bool:
+def run_unit(action: str, unit: str, runner=subprocess.run) -> bool | None:
     # No user-supplied command, PID, signal, endpoint, or device path.
     if action not in ("start", "stop") or not SAFE_UNIT.fullmatch(unit):
         return False
@@ -163,7 +241,8 @@ def run_unit(action: str, unit: str, runner=subprocess.run) -> bool:
                         capture_output=True, text=True,
                         timeout=SUBPROCESS_TIMEOUT_SEC, check=False)
     except (OSError, subprocess.TimeoutExpired):
-        return False
+        # Killing the systemctl client does not prove the systemd job stopped.
+        return None
     return result.returncode == 0
 
 
@@ -177,7 +256,8 @@ class Broker:
         self.revisions = {key: secrets.randbelow((1 << 48) - 1) + 1
                           for key in self.services}
         self.signatures: dict[tuple[str, str], tuple] = {}
-        self.history: OrderedDict[str, tuple[str, dict]] = OrderedDict()
+        self.history: OrderedDict[str, tuple[dict, dict]] = OrderedDict()
+        self.uncertain: set[tuple[str, str]] = set()
 
     def _status(self, key: tuple[str, str]) -> dict:
         svc = self.services[key]
@@ -201,9 +281,9 @@ class Broker:
                disposition: str, error_code: str | None = None) -> dict:
         return {
             "schema_version": RESULT_SCHEMA,
-            "request_id": req.get("request_id", ""),
-            "robot_id": req.get("robot_id", ""),
-            "peripheral_id": req.get("peripheral_id", ""),
+            "request_id": req["request_id"] if isinstance(req.get("request_id"), str) and UUID.fullmatch(req["request_id"]) else "",
+            "robot_id": req["robot_id"] if isinstance(req.get("robot_id"), str) and SAFE_ID.fullmatch(req["robot_id"]) else "",
+            "peripheral_id": req["peripheral_id"] if isinstance(req.get("peripheral_id"), str) and SAFE_ID.fullmatch(req["peripheral_id"]) else "",
             "observed_at": utc_now(),
             "device": state["device"] if state else {
                 "presence": "unknown", "binding_verified": False
@@ -217,7 +297,14 @@ class Broker:
             "actuation_enabled": False
         }
 
-    def process(self, req: object) -> dict:
+    def _record(self, req: dict, result: dict) -> dict:
+        ledger_id = req["request_id"].lower()
+        self.history[ledger_id] = (dict(req), deepcopy(result))
+        if len(self.history) > MAX_HISTORY:
+            self.history.popitem(last=False)
+        return result
+
+    def process(self, req: object, *, may_dispatch=None) -> dict:
         if not isinstance(req, dict):
             return self._reply({}, None, "rejected", "invalid_request")
         keys = {"schema_version", "request_id", "robot_id",
@@ -246,22 +333,32 @@ class Broker:
                 or req["expected_status_revision"] < 0):
             return self._reply(req, None, "rejected", "expected_revision_required")
 
+        ledger_id = req["request_id"].lower()
+        if ledger_id in self.history:
+            prior_request, past = self.history[ledger_id]
+            if prior_request != req:
+                return self._reply(req, None, "rejected", "request_id_reused")
+            # Historical acknowledgement, not a fresh observation.
+            return deepcopy(past)
+
         state = self._status(key)
         if req["action"] == "status":
-            return self._reply(req, state, "status")
-        if req["request_id"] in self.history:
-            prior_action, past = self.history[req["request_id"]]
-            if (past["robot_id"], past["peripheral_id"]) != key or prior_action != req["action"]:
-                return self._reply(req, state, "rejected", "request_id_reused")
-            return past.copy()
+            return self._reply(req, state, "status",
+                               "reconciliation_required" if key in self.uncertain else None)
+
+        def reject(reason: str) -> dict:
+            return self._record(req, self._reply(req, state, "rejected", reason))
+
+        if key in self.uncertain:
+            return reject("reconciliation_required")
         if req["expected_status_revision"] != state["status_revision"]:
-            return self._reply(req, state, "rejected", "stale_status_revision")
+            return reject("stale_status_revision")
         if not state["publisher"]["manager_available"]:
-            return self._reply(req, state, "rejected", "manager_unavailable")
+            return reject("manager_unavailable")
         if state["publisher"]["lifecycle"] in ("not_installed", "unknown"):
-            return self._reply(req, state, "rejected", "service_unavailable")
-        if state["publisher"]["lifecycle"] in ("starting", "stopping"):
-            return self._reply(req, state, "rejected", "transition_in_progress")
+            return reject("service_unavailable")
+        if state["publisher"]["lifecycle"] in ("starting", "stopping", "busy"):
+            return reject("transition_in_progress")
 
         start = req["action"] == "acquisition.start"
         present = state["device"]["presence"] == "present"
@@ -271,21 +368,28 @@ class Broker:
         elif not start and state["publisher"]["lifecycle"] == "stopped":
             result = self._reply(req, state, "no_op")
         elif start and (not present or not verified):
-            result = self._reply(req, state, "rejected", "device_missing_or_unverified")
+            return reject("device_missing_or_unverified")
+        elif may_dispatch is not None and not may_dispatch():
+            return reject("client_disconnected")
         else:
-            # Any unmanaged serial reader remains untouched. If serial is
-            # busy the publisher will fail acquiring its exclusive lock;
-            # this broker never sends signals to unrelated processes.
+            # Consume the revision before every dispatch, even failed/uncertain
+            # attempts. Eviction from the bounded ledger cannot replay that
+            # dispatch with its old revision within this broker epoch.
+            self.revisions[key] += 1
+            self.uncertain.add(key)
             action = "start" if start else "stop"
             success = run_unit(action, self.services[key]["service_ref"], self.runner)
             after = self._status(key)
-            result = self._reply(req, after, "accepted" if success else "failed",
-                                 None if success else "systemd_action_failed")
-        self.history[req["request_id"]] = (req["action"], result.copy())
-        self.history.move_to_end(req["request_id"])
-        if len(self.history) > MAX_HISTORY:
-            self.history.popitem(last=False)
-        return result
+            target = "running" if start else "stopped"
+            if (success is True and after["publisher"]["manager_available"]
+                    and after["publisher"]["lifecycle"] == target):
+                self.uncertain.remove(key)
+                result = self._reply(req, after, "accepted")
+            else:
+                # The systemd job may have effects after our client returns.
+                # Do not unlock by observing a single snapshot or auto-retry.
+                result = self._reply(req, after, "failed", "systemd_outcome_unknown")
+        return self._record(req, result)
 
 
 def socket_path() -> Path:
@@ -320,14 +424,30 @@ def peer_allowed(conn: socket.socket, expected_uid: int | None = None) -> bool:
         return False
 
 
+def handle_connection(manager: Broker, conn: socket.socket) -> None:
+    if not peer_allowed(conn):
+        return
+    try:
+        request = strict_json(read_frame(conn, time.monotonic() + READ_TIMEOUT_SEC))
+        answer = manager.process(request, may_dispatch=lambda: peer_can_receive(conn))
+        reply = json.dumps(answer, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n"
+        send_frame(conn, reply, time.monotonic() + WRITE_TIMEOUT_SEC)
+    except (ValueError, UnicodeError, OSError, RecursionError):
+        # A disconnected/malformed client never takes down the listener.
+        # Never retry a previously dispatched command here.
+        return
+
+
 def serve(manager: Broker, path: Path, *, stop_event=None, register_handlers=True) -> None:
     ensure_socket_dir(path)
     if path.exists() or path.is_symlink():
         raise FileExistsError("existing broker socket: refuse to replace a live/unknown socket")
     os.umask(0o077)
     listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    owned_socket = None
     try:
         listener.bind(str(path))
+        owned_socket = path.lstat()
         os.chmod(path, 0o600)
         listener.listen(4)
         listener.settimeout(0.5)
@@ -347,28 +467,20 @@ def serve(manager: Broker, path: Path, *, stop_event=None, register_handlers=Tru
                 except socket.timeout:
                     continue
                 with conn:
-                    conn.settimeout(2.0)
-                    if not peer_allowed(conn):
-                        # No response for unauthorized/unknown peers.
-                        continue
-                    try:
-                        message = conn.makefile("rb").readline(MAX_MESSAGE + 1)
-                        if not message or len(message) > MAX_MESSAGE or not message.endswith(b"\n"):
-                            continue
-                        request = json.loads(message)
-                        answer = manager.process(request)
-                    except (ValueError, UnicodeError, OSError):
-                        continue
-                    reply = json.dumps(answer, separators=(",", ":")).encode("utf-8") + b"\n"
-                    conn.sendall(reply)
+                    handle_connection(manager, conn)
         finally:
             if register_handlers:
                 signal.signal(signal.SIGTERM, previous_term)
                 signal.signal(signal.SIGINT, previous_int)
     finally:
         listener.close()
-        if path.exists() and stat.S_ISSOCK(path.lstat().st_mode):
-            path.unlink()
+        if owned_socket is not None:
+            try:
+                current = path.lstat()
+                if stat.S_ISSOCK(current.st_mode) and (current.st_dev, current.st_ino) == (owned_socket.st_dev, owned_socket.st_ino):
+                    path.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -393,7 +505,7 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (OSError, ValueError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, RecursionError) as error:
         # Do not leak raw auth tokens, service env or user-supplied JSON.
         print(f"Peripheral broker unavailable: {type(error).__name__}", file=sys.stderr)
         sys.exit(1)

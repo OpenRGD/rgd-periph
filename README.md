@@ -25,7 +25,7 @@ cargo fmt --all -- --check
 python3 -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py' -v
 ```
 
-Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The schema checks inherited from Console are not complete JSON Schema validation. Cross-language conformance, strict validation, hardening, packaging and deployment approval remain open.
+Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The schema checks inherited from Console are not complete JSON Schema validation. See [IPC reliability and failure semantics](docs/IPC-RELIABILITY.md) for the 01C candidate, including unknown outcomes, volatile quarantine and restart limits. Full cross-language conformance, strict schema validation, durable recovery, packaging and deployment approval remain open.
 
 ## Provenance and license
 
