@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:host:peripheral-host-request:v0.1-candidate",
+  "title": "Host broker local request",
+  "description": "Internal same-UID Unix socket only. Not a public Console API, not an actuator interface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "robot_id",
+    "peripheral_id",
+    "action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "openrgd.peripheral-host-request.v0.1-candidate"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "robot_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "peripheral_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "action": {
+      "enum": [
+        "status",
+        "acquisition.start",
+        "acquisition.stop"
+      ]
+    },
+    "expected_status_revision": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "acquisition.start",
+              "acquisition.stop"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "expected_status_revision"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "expected_status_revision"
+          ]
+        }
+      }
+    }
+  ]
+}

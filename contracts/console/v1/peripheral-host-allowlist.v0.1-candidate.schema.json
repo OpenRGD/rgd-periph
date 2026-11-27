@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:host:peripheral-host-allowlist:v0.1-candidate",
+  "title": "Rootless broker fixed service allowlist",
+  "description": "Internal same-UID Unix socket only. Not a public Console API, not an actuator interface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "services"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "openrgd.peripheral-host-allowlist.v0.1-candidate"
+    },
+    "services": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "robot_id",
+          "peripheral_id",
+          "service_ref",
+          "device_by_path",
+          "usb_vid_pid",
+          "resource_lock"
+        ],
+        "properties": {
+          "robot_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,79}$"
+          },
+          "peripheral_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,79}$"
+          },
+          "service_ref": {
+            "type": "string",
+            "pattern": "^openrgd-[a-z0-9-]{1,62}\\.service$"
+          },
+          "device_by_path": {
+            "type": "string",
+            "pattern": "^/dev/serial/by-path/[A-Za-z0-9_.:-]+$"
+          },
+          "usb_vid_pid": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{4}:[0-9a-f]{4}$"
+          },
+          "resource_lock": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9:_-]{0,127}$"
+          }
+        }
+      }
+    }
+  }
+}

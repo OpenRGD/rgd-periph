@@ -1,0 +1,123 @@
+{
+  "version": "0.1-candidate",
+  "source_repository": "OpenRGD/rgd-console",
+  "source_commit": "b331dd32415eeda0d107676920a6dea91170cc4f",
+  "source_pr": 22,
+  "source_ci_head": "610f02fe277fac89fdf2912a671cd3a13cb488ff",
+  "purpose": "Immutable origin snapshot; not runtime acceptance. Exact bytes of this first extraction commit. Later adaptations have separate commits.",
+  "entries": [
+    {
+      "source_path": "LICENSE",
+      "destination_path": "LICENSE",
+      "git_blob_sha": "96f4a610a83139ac96d915e26033fa0805644229",
+      "sha256": "b5f4cc499e460f9df1a9abf2605ab389415c17838e0d763608966774e2ab211d",
+      "bytes": 1077
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-action-result.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-action-result.v0.1-candidate.schema.json",
+      "git_blob_sha": "82b47c4d006bbdb96af00a12304723c9d3bf98bc",
+      "sha256": "373bc1ed05444f53e5bbace2eb9443007de211775c69e1496f8056bc3df70cc7",
+      "bytes": 1859
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-action.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-action.v0.1-candidate.schema.json",
+      "git_blob_sha": "e4b363f59a1e2130c54994e013440874847b00eb",
+      "sha256": "8a296b25b3bc2a1df11f209efe5706281a317ec0016dbcf6bea78e056bed7aee",
+      "bytes": 1157
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-descriptor.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-descriptor.v0.1-candidate.schema.json",
+      "git_blob_sha": "84ba411243c08ebbf06a0de22759d913d40ed6ec",
+      "sha256": "cea35bfbcb33e21baa05c1cf576f0de10370524ea0430d3139226c405168f626",
+      "bytes": 4853
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-host-allowlist.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-host-allowlist.v0.1-candidate.schema.json",
+      "git_blob_sha": "bdf69f984d08021bb5101e8f7f790bf1ba143aaa",
+      "sha256": "6de573c795b221d19863fbd38e3289041973d5d5ce86b248e508c54c2b824e84",
+      "bytes": 1674
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-host-request.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-host-request.v0.1-candidate.schema.json",
+      "git_blob_sha": "7a2dc7286f43ac4932b89a70910934fcf6efe69b",
+      "sha256": "3a037a37c52539f9518b766914f20e873d65011ee8e2ab3003bd5e95fe934fd6",
+      "bytes": 1561
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-host-response.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-host-response.v0.1-candidate.schema.json",
+      "git_blob_sha": "b24fe1ad725547e19fae64ec7cc37d4d04efc49e",
+      "sha256": "c38846c4c6b00df3cb88f0cf64514e173a15830e8825f2044339507aee601c82",
+      "bytes": 2499
+    },
+    {
+      "source_path": "contracts/console/v1/peripheral-status.v0.1-candidate.schema.json",
+      "destination_path": "contracts/console/v1/peripheral-status.v0.1-candidate.schema.json",
+      "git_blob_sha": "ec083ccec48ba47c1d9726480bac149ca6fb3e3c",
+      "sha256": "ac5a344d196ab90e0d592edfae55f155dc2dcffa9d044a872570ffc12db2fe1b",
+      "bytes": 4588
+    },
+    {
+      "source_path": "examples/peripherals/paky01-camera.future-example.descriptor.json",
+      "destination_path": "examples/peripherals/paky01-camera.future-example.descriptor.json",
+      "git_blob_sha": "3bc1dee4c6ab05df02a9c84531b8f3554b6c2676",
+      "sha256": "000cc7d51de9858eb83dcc1a4542f384e68c40d65f2ea53ddc7e8a2a17ed2a08",
+      "bytes": 1418
+    },
+    {
+      "source_path": "examples/peripherals/paky01-imu.descriptor.json",
+      "destination_path": "examples/peripherals/paky01-imu.descriptor.json",
+      "git_blob_sha": "abbf04f568944d23526518551d3bad9a4ea36ad1",
+      "sha256": "a3c2c85cc882d4dd3297d97cfb21a753218cd5f37fba4e52c56e538afa1d0362",
+      "bytes": 1110
+    },
+    {
+      "source_path": "examples/peripherals/paky01-imu.manager-unavailable.status.json",
+      "destination_path": "examples/peripherals/paky01-imu.manager-unavailable.status.json",
+      "git_blob_sha": "340a149b0879b6976b941ebff6a52cd86f5001d5",
+      "sha256": "5ca4543220e46a6cac167726d203f8cff3005bc45ff641f823b55a6832de0d38",
+      "bytes": 825
+    },
+    {
+      "source_path": "examples/peripherals/paky01-imu.start-rejected.result.json",
+      "destination_path": "examples/peripherals/paky01-imu.start-rejected.result.json",
+      "git_blob_sha": "0d07d7972dc7cb421f7b8c27dccf9d0808ec2b51",
+      "sha256": "a19e924f5fc5af816344f29c57fc7a807b680c91011ab2ce35bde3a772b798d5",
+      "bytes": 430
+    },
+    {
+      "source_path": "examples/peripherals/paky01-imu.start.action.json",
+      "destination_path": "examples/peripherals/paky01-imu.start.action.json",
+      "git_blob_sha": "7c951cbbc35d33bb9cfecc59df70f3a272d8c442",
+      "sha256": "dd0e26de264d9784b606b6cbbfe826b2cd0f618d770d04ef44356a7e0f337822",
+      "bytes": 249
+    },
+    {
+      "source_path": "services/api/src/peripherals.rs",
+      "destination_path": "crates/periph-core/src/lib.rs",
+      "git_blob_sha": "46612ca464756d166feff7f8637aaaad82fb8349",
+      "sha256": "5e78738a5f2d99a6460bd1906a3db87547ff75e5ecff92b1ccfc2c1be8b89703",
+      "bytes": 24457
+    },
+    {
+      "source_path": "services/peripheral-manager/host_broker.py",
+      "destination_path": "services/peripheral-manager/host_broker.py",
+      "git_blob_sha": "f20aea0e551195aea7c587ad0bdc11eb2e88a055",
+      "sha256": "83451097ecaed58cafa0becb2a1f85a91b436ec1b4086acb081b099c80a5b774",
+      "bytes": 18463
+    },
+    {
+      "source_path": "services/peripheral-manager/control_cli.py",
+      "destination_path": "services/peripheral-manager/control_cli.py",
+      "git_blob_sha": "03cecd646e689ef21939de8036c1fb73c086bce3",
+      "sha256": "47f7484140398216ad6251f64d1563be880feb1cbbed8f6d7f2aa02b31d32677",
+      "bytes": 3346
+    }
+  ],
+  "license": "MIT (OpenRGD original source only)"
+}

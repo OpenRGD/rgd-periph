@@ -1,0 +1,39 @@
+{
+  "schema_version": "console.peripheral-descriptor.v0.1-candidate",
+  "robot_id": "paky-01",
+  "peripheral_id": "torso-imu-01",
+  "display_name": "WIT IMU — sensore torso Paky-01",
+  "category": "imu",
+  "source_kind": "physical",
+  "binding": {
+    "transport": "usb_serial",
+    "binding_ref": "paky01:imu_by_path",
+    "verification": "configured_unverified"
+  },
+  "publisher": {
+    "publisher_id": "paky01-wit-publisher",
+    "host_id": "paky01-minipc",
+    "manager": "systemd_user",
+    "service_ref": "openrgd-paky01-imu.service",
+    "resource_lock": "paky01:imu_serial_exclusive",
+    "ownership": "exclusive_device_owner",
+    "startup_policy": "manual"
+  },
+  "streams": [
+    {
+      "stream_id": "imu.sensor_axes",
+      "sample_schema": "console.imu.v0.1-candidate",
+      "data_class": "sensor_observation",
+      "freshness_ms": 3000,
+      "nominal_rate_hz": 10,
+      "fanout": "multiple_read_only_consumers",
+      "buffer_policy": "latest_only"
+    }
+  ],
+  "capabilities": [
+    "observation.read",
+    "acquisition.start",
+    "acquisition.stop"
+  ],
+  "actuation_enabled": false
+}

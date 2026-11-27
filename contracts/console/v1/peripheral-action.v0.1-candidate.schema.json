@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:console:peripheral-action:v0.1-candidate",
+  "title": "Operator request to manage acquisition lifecycle only",
+  "description": "Design-only candidate. No host device access or operational control is installed by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "robot_id",
+    "peripheral_id",
+    "action",
+    "expected_status_revision"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "console.peripheral-action.v0.1-candidate"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "robot_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "peripheral_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "action": {
+      "enum": [
+        "acquisition.start",
+        "acquisition.stop"
+      ]
+    },
+    "expected_status_revision": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

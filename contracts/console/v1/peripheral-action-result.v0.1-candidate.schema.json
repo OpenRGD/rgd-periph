@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:console:peripheral-action-result:v0.1-candidate",
+  "title": "Acknowledgement is not proof of LIVE observation",
+  "description": "Design-only candidate. No host device access or operational control is installed by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "robot_id",
+    "peripheral_id",
+    "action",
+    "disposition",
+    "publisher_lifecycle",
+    "status_revision",
+    "observed_at",
+    "error_code",
+    "actuation_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "console.peripheral-action-result.v0.1-candidate"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "robot_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "peripheral_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "action": {
+      "enum": [
+        "acquisition.start",
+        "acquisition.stop"
+      ]
+    },
+    "disposition": {
+      "enum": [
+        "accepted",
+        "no_op",
+        "rejected",
+        "failed"
+      ]
+    },
+    "publisher_lifecycle": {
+      "enum": [
+        "not_installed",
+        "stopped",
+        "starting",
+        "running",
+        "stopping",
+        "failed",
+        "busy",
+        "unknown"
+      ]
+    },
+    "status_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "actuation_enabled": {
+      "const": false
+    }
+  }
+}

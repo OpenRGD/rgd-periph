@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:console:peripheral-descriptor:v0.1-candidate",
+  "title": "Peripheral manager static sensor descriptor",
+  "description": "Design-only candidate. No host device access or operational control is installed by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "robot_id",
+    "peripheral_id",
+    "display_name",
+    "category",
+    "source_kind",
+    "binding",
+    "publisher",
+    "streams",
+    "capabilities",
+    "actuation_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "console.peripheral-descriptor.v0.1-candidate"
+    },
+    "robot_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "peripheral_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "category": {
+      "enum": [
+        "imu",
+        "camera",
+        "microphone",
+        "depth",
+        "lidar",
+        "environment",
+        "range_sensor",
+        "generic"
+      ]
+    },
+    "source_kind": {
+      "enum": [
+        "physical",
+        "simulated"
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transport",
+        "binding_ref",
+        "verification"
+      ],
+      "properties": {
+        "transport": {
+          "enum": [
+            "usb_serial",
+            "usb_video",
+            "usb_audio",
+            "ethernet",
+            "i2c",
+            "spi",
+            "virtual"
+          ]
+        },
+        "binding_ref": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9:._-]{0,127}$"
+        },
+        "verification": {
+          "enum": [
+            "configured_unverified",
+            "operator_verified",
+            "not_configured"
+          ]
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publisher_id",
+        "host_id",
+        "manager",
+        "service_ref",
+        "resource_lock",
+        "ownership",
+        "startup_policy"
+      ],
+      "properties": {
+        "publisher_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,99}$"
+        },
+        "host_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9:._-]{0,127}$"
+        },
+        "manager": {
+          "enum": [
+            "systemd_user",
+            "external_read_only"
+          ]
+        },
+        "service_ref": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9:._-]{0,127}$"
+        },
+        "resource_lock": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9:._-]{0,127}$"
+        },
+        "ownership": {
+          "enum": [
+            "exclusive_device_owner",
+            "externally_managed"
+          ]
+        },
+        "startup_policy": {
+          "enum": [
+            "manual",
+            "on_host_boot_explicit"
+          ]
+        }
+      }
+    },
+    "streams": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stream_id",
+          "sample_schema",
+          "data_class",
+          "freshness_ms",
+          "nominal_rate_hz",
+          "fanout",
+          "buffer_policy"
+        ],
+        "properties": {
+          "stream_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]{0,99}$"
+          },
+          "sample_schema": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 150
+          },
+          "data_class": {
+            "enum": [
+              "sensor_observation",
+              "privacy_sensitive_media"
+            ]
+          },
+          "freshness_ms": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 60000
+          },
+          "nominal_rate_hz": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0,
+            "maximum": 1000
+          },
+          "fanout": {
+            "const": "multiple_read_only_consumers"
+          },
+          "buffer_policy": {
+            "enum": [
+              "latest_only",
+              "bounded_replay"
+            ]
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "observation.read",
+          "acquisition.start",
+          "acquisition.stop"
+        ]
+      }
+    },
+    "actuation_enabled": {
+      "const": false
+    }
+  }
+}
