@@ -70,8 +70,8 @@ def execute(args, talk=transact) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=["status", "start", "stop"])
-    parser.add_argument("--robot-id", default="paky-01")
-    parser.add_argument("--peripheral-id", default="torso-imu-01")
+    parser.add_argument("--robot-id", required=True)
+    parser.add_argument("--peripheral-id", required=True)
     parser.add_argument("--socket", type=str, default=None)
     parser.add_argument("--confirm", default="")
     args = parser.parse_args(argv)
@@ -82,6 +82,6 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except (OSError, ValueError, KeyError, socket.timeout) as error:
-        print(f"PERIPH-0.2 client: {type(error).__name__}; no command accepted",
+        print(f"PERIPH-0.2 client: {type(error).__name__}; outcome unconfirmed; reconcile status before any retry",
               file=sys.stderr)
         sys.exit(1)
