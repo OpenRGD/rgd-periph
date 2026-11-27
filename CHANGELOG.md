@@ -13,3 +13,10 @@
 - Bound local IPC reads/writes and client transactions with monotonic deadlines; isolate disconnected clients.
 - Unconfirmed dispatch quarantines the service; never retry blindly. Consume revisions on dispatch and bind retained UUIDs to complete requests.
 - Strict local JSON/response guards, mock failure/replay tests; schema bytes preserved. Volatile quarantine and restart recovery limitations documented.
+
+### Schema and cross-language conformance candidate (01D)
+
+- Validate all seven frozen Draft 2020-12 schemas with RFC 3339 checking; enforce host request, response and allowlist schemas at Python boundaries.
+- Add synthetic corpus: 60 wire cases and 32 managed-host policy vectors executed against actual Rust admission and mocked Python Broker.process.
+- Align local safe revision range and exhaustion gate; preserve candidate wire bytes and original immutable snapshot.
+- Direct Python schema-validation dependencies pinned; packaging, full runtime recovery, authorization and consumer integration remain separate.

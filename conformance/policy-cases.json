@@ -1,0 +1,615 @@
+{
+  "version": "periph.conformance.policy.v0.1-candidate",
+  "profile": "managed-usb-serial-authorized-fixture",
+  "description": "Shared pure-domain versus actual mocked host admission. Fixture assumes reviewed registration and both acquisition capabilities; no operator authentication, hardware or persistent replay claim.",
+  "cases": [
+    {
+      "id": "start-stopped",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "start-failed",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "failed",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "start-running-noop",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "no_op",
+        "reason": null
+      }
+    },
+    {
+      "id": "start-running-device-absent-noop-only",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "absent",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "no_op",
+        "reason": null
+      }
+    },
+    {
+      "id": "stop-running",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "stop-failed",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "failed",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "stop-stopped-noop",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "no_op",
+        "reason": null
+      }
+    },
+    {
+      "id": "stop-absent-running",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "absent",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "stop-unknown-binding-running",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "unknown",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "start-stale-revision",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 41,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "stale_revision"
+      }
+    },
+    {
+      "id": "stop-stale-revision",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 43,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "stale_revision"
+      }
+    },
+    {
+      "id": "manager-unavailable",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": false,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "manager-unavailable-noop-denied",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "running",
+        "manager_available": false,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "start-not_installed",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "not_installed",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "stop-not_installed",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "not_installed",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "start-unknown",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "unknown",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "stop-unknown",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "unknown",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "manager_unavailable"
+      }
+    },
+    {
+      "id": "start-starting",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "starting",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "stop-starting",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "starting",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "start-stopping",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopping",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "stop-stopping",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopping",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "start-busy",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "busy",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "stop-busy",
+      "input": {
+        "action": "acquisition.stop",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "busy",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "transition"
+      }
+    },
+    {
+      "id": "start-absent",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "absent",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "device_unavailable"
+      }
+    },
+    {
+      "id": "start-unknown",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "unknown",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "device_unavailable"
+      }
+    },
+    {
+      "id": "start-present-unverified",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": false
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "device_unavailable"
+      }
+    },
+    {
+      "id": "wrong-robot",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "other-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "scope"
+      }
+    },
+    {
+      "id": "wrong-peripheral",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "other-imu",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "scope"
+      }
+    },
+    {
+      "id": "malformed-uuid",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "bad-uuid",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "request_id"
+      }
+    },
+    {
+      "id": "uppercase-uuid",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "D64FDA80-3941-40F1-9C31-2F100A5578BC",
+        "expected_revision": 42,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "dispatch",
+        "reason": null
+      }
+    },
+    {
+      "id": "revision-above-safe-integer",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 9007199254740992,
+        "observed_revision": 42,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "invalid_revision"
+      }
+    },
+    {
+      "id": "revision-exhaustion",
+      "input": {
+        "action": "acquisition.start",
+        "robot_id": "conformance-robot",
+        "peripheral_id": "imu-a",
+        "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+        "expected_revision": 9007199254740990,
+        "observed_revision": 9007199254740990,
+        "lifecycle": "stopped",
+        "manager_available": true,
+        "presence": "present",
+        "binding_verified": true
+      },
+      "expected": {
+        "decision": "reject",
+        "reason": "revision_exhausted"
+      }
+    }
+  ]
+}

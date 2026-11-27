@@ -18,14 +18,16 @@ Console is a future version-pinned client, not a required runtime dependency. No
 ## Offline developer checks
 
 ```sh
+python3 -m pip install -r requirements-host.txt
 python3 scripts/verify_provenance.py
 node --test scripts/peripheral-contract.test.mjs scripts/peripheral-host-contract.test.mjs
 cargo test --workspace
 cargo fmt --all -- --check
 python3 -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py' -v
+python3 -m unittest discover -s conformance/tests -p 'test_*.py' -v
 ```
 
-Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The schema checks inherited from Console are not complete JSON Schema validation. See [IPC reliability and failure semantics](docs/IPC-RELIABILITY.md) for the 01C candidate, including unknown outcomes, volatile quarantine and restart limits. Full cross-language conformance, strict schema validation, durable recovery, packaging and deployment approval remain open.
+Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The original JS regressions remain, alongside [full Draft 2020-12 schema and managed-host cross-language conformance](docs/CONFORMANCE.md). The Python IPC boundary now validates the existing schemas with jsonschema and RFC 3339 format checking; direct dependency versions are pinned in requirements-host.txt. The Rust library stays a typed policy domain, not a wire ingress. [IPC reliability and failure semantics](docs/IPC-RELIABILITY.md) documents volatile quarantine and restart limits. Reproducible transitive locks, durable recovery, wider consumer/authorization conformance, packaging and deployment approval remain open.
 
 ## Provenance and license
 

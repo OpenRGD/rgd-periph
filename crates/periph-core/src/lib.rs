@@ -13,6 +13,8 @@ pub const DESCRIPTOR_SCHEMA: &str = "console.peripheral-descriptor.v0.1-candidat
 pub const STATUS_SCHEMA: &str = "console.peripheral-status.v0.1-candidate";
 pub const ACTION_SCHEMA: &str = "console.peripheral-action.v0.1-candidate";
 pub const RESULT_SCHEMA: &str = "console.peripheral-action-result.v0.1-candidate";
+/// Local interoperable revision profile; historical schema bytes stay unchanged.
+pub const MAX_SAFE_REVISION: u64 = (1 << 53) - 1;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -323,6 +325,18 @@ pub enum ValidationError {
     OperationNotAvailable,
     InconsistentStatus,
     InvalidRequestId,
+    InvalidRevision,
+    RevisionExhausted,
+}
+
+fn scoped_id_ok(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    !bytes.is_empty()
+        && bytes.len() <= 80
+        && bytes[0].is_ascii_lowercase()
+        && bytes[1..]
+            .iter()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || *b == b'-')
 }
 
 pub fn validate_descriptor(d: &PeripheralDescriptor) -> Result<(), ValidationError> {
@@ -335,8 +349,8 @@ pub fn validate_descriptor(d: &PeripheralDescriptor) -> Result<(), ValidationErr
     if d.source_kind == SourceKind::Unknown {
         return Err(ValidationError::SourceNotPhysical);
     }
-    if d.robot_id.is_empty()
-        || d.peripheral_id.is_empty()
+    if !scoped_id_ok(&d.robot_id)
+        || !scoped_id_ok(&d.peripheral_id)
         || d.display_name.is_empty()
         || d.binding.binding_ref.is_empty()
         || d.publisher.service_ref.is_empty()
@@ -425,6 +439,12 @@ pub fn validate_status(
     if s.actuation_enabled {
         return Err(ValidationError::MotorAuthorityNotAllowed);
     }
+    if s.status_revision > MAX_SAFE_REVISION {
+        return Err(ValidationError::InvalidRevision);
+    }
+    if s.device.binding_verified && s.device.presence != DevicePresence::Present {
+        return Err(ValidationError::InconsistentStatus);
+    }
     if !s.publisher.manager_available && (s.controls.can_start || s.controls.can_stop) {
         return Err(ValidationError::InconsistentStatus);
     }
@@ -494,6 +514,9 @@ pub fn admit_action(
     if !request_id_ok(&request.request_id) {
         return Err(ValidationError::InvalidRequestId);
     }
+    if request.expected_status_revision > MAX_SAFE_REVISION {
+        return Err(ValidationError::InvalidRevision);
+    }
     if request.expected_status_revision != s.status_revision {
         return Err(ValidationError::StaleStatusRevision);
     }
@@ -538,6 +561,9 @@ pub fn admit_action(
     };
     if !permitted {
         return Err(ValidationError::OperationNotAvailable);
+    }
+    if s.status_revision >= MAX_SAFE_REVISION - 1 {
+        return Err(ValidationError::RevisionExhausted);
     }
     Ok(Admission::DispatchToAuthorizedBroker)
 }

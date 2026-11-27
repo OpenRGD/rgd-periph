@@ -31,12 +31,15 @@ import subprocess
 import sys
 import time
 
+from contract_validation import validate_instance
+
 SCHEMA = "openrgd.peripheral-host-request.v0.1-candidate"
 RESULT_SCHEMA = "openrgd.peripheral-host-response.v0.1-candidate"
 ALLOWLIST_SCHEMA = "openrgd.peripheral-host-allowlist.v0.1-candidate"
 MAX_MESSAGE = 2048
 MAX_SERVICES = 12
 MAX_HISTORY = 64
+MAX_SAFE_REVISION = (1 << 53) - 1
 SYSTEMCTL = "/usr/bin/systemctl"
 UDEVADM = "/usr/bin/udevadm"
 SAFE_UNIT = re.compile(r"^openrgd-[a-z0-9-]{1,62}\.service$")
@@ -135,6 +138,7 @@ def read_allowlist(path: Path, uid: int | None = None) -> dict:
     if len(raw) > 16 * 1024:
         raise ValueError("allowlist_too_large")
     parsed = strict_json(raw)
+    validate_instance("host-allowlist", parsed)
     if (not isinstance(parsed, dict)
             or set(parsed) != {"schema_version", "services"}
             or parsed["schema_version"] != ALLOWLIST_SCHEMA
@@ -157,8 +161,8 @@ def read_allowlist(path: Path, uid: int | None = None) -> dict:
         if not SAFE_UNIT.fullmatch(row["service_ref"]):
             raise ValueError("invalid_unit")
         dev = row["device_by_path"]
-        if (not isinstance(dev, str) or not dev.startswith("/dev/serial/by-path/")
-                or ".." in dev or any(ch.isspace() for ch in dev)):
+        if (not isinstance(dev, str) or not re.fullmatch(r"/dev/serial/by-path/[A-Za-z0-9_.:-]+", dev)
+                or ".." in dev):
             raise ValueError("invalid_fixed_device_path")
         if not re.fullmatch(r"[0-9a-f]{4}:[0-9a-f]{4}", row["usb_vid_pid"]):
             raise ValueError("invalid_usb_vid_pid")
@@ -330,8 +334,12 @@ class Broker:
             return self._reply(req, None, "rejected", "unexpected_revision")
         if req["action"] != "status" and (
                 type(req.get("expected_status_revision")) is not int
-                or req["expected_status_revision"] < 0):
+                or not 0 <= req["expected_status_revision"] <= MAX_SAFE_REVISION):
             return self._reply(req, None, "rejected", "expected_revision_required")
+        try:
+            validate_instance("host-request", req)
+        except ValueError:
+            return self._reply(req, None, "rejected", "invalid_request_schema")
 
         ledger_id = req["request_id"].lower()
         if ledger_id in self.history:
@@ -369,6 +377,8 @@ class Broker:
             result = self._reply(req, state, "no_op")
         elif start and (not present or not verified):
             return reject("device_missing_or_unverified")
+        elif state["status_revision"] >= MAX_SAFE_REVISION - 1:
+            return reject("revision_exhausted")
         elif may_dispatch is not None and not may_dispatch():
             return reject("client_disconnected")
         else:
@@ -430,6 +440,7 @@ def handle_connection(manager: Broker, conn: socket.socket) -> None:
     try:
         request = strict_json(read_frame(conn, time.monotonic() + READ_TIMEOUT_SEC))
         answer = manager.process(request, may_dispatch=lambda: peer_can_receive(conn))
+        validate_instance("host-response", answer)
         reply = json.dumps(answer, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n"
         send_frame(conn, reply, time.monotonic() + WRITE_TIMEOUT_SEC)
     except (ValueError, UnicodeError, OSError, RecursionError):

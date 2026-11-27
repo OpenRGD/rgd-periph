@@ -16,6 +16,7 @@ import sys
 import time
 from uuid import uuid4
 
+from contract_validation import validate_instance
 from host_broker import (CLIENT_TIMEOUT_SEC, MAX_MESSAGE, RESULT_SCHEMA, SCHEMA,
                          SAFE_ID, SAFE_UNIT, peer_allowed, read_frame, remaining,
                          send_frame, socket_path, strict_json)
@@ -28,7 +29,8 @@ LIFECYCLES = {"not_installed", "stopped", "starting", "running", "stopping",
 
 
 def validate_reply(response, request):
-    """Strict local response shape/identity checks; full conformance is 01D."""
+    """Schema validation plus local response identity and semantic guards."""
+    validate_instance("host-response", response)
     def require(condition):
         if not condition:
             raise ValueError("invalid_or_untrusted_host_broker_reply")
@@ -57,7 +59,9 @@ def validate_reply(response, request):
                               and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", error)))
     if disposition in ("accepted", "no_op"):
         require(error is None)
-        require(response["status_revision"] >= request["expected_status_revision"])
+        require(response["status_revision"] > request["expected_status_revision"]
+                if disposition == "accepted" else
+                response["status_revision"] == request["expected_status_revision"])
     if disposition in ("rejected", "failed"):
         require(error is not None)
     device = response["device"]
@@ -82,6 +86,7 @@ def validate_reply(response, request):
 
 
 def transact(endpoint, request: dict) -> dict:
+    validate_instance("host-request", request)
     payload = json.dumps(request, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n"
     if len(payload) > MAX_MESSAGE:
         raise ValueError("request_exceeds_limit")

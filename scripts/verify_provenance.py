@@ -9,7 +9,8 @@ SNAPSHOT = "3b55bca50570497f22f3eadab3752f0f3e8fada1"
 MANIFEST = "provenance/source-snapshot.json"
 # Explicitly adapted source files; original snapshot remains immutable.
 ADAPTED = {"services/peripheral-manager/control_cli.py",
-           "services/peripheral-manager/host_broker.py"}
+           "services/peripheral-manager/host_broker.py",
+           "crates/periph-core/src/lib.rs"}
 
 
 def blob_at(path):
