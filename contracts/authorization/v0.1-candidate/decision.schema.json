@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:periph:authorization:decision:v0.1-candidate",
+  "title": "PERIPH decision offline candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "decision",
+    "reason",
+    "policy_revision",
+    "grants_authority",
+    "actuation_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "openrgd.periph.authz-decision.v0.1-candidate"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "decision": {
+      "enum": [
+        "eligible_for_host_review",
+        "deny"
+      ]
+    },
+    "reason": {
+      "enum": [
+        "eligible",
+        "invalid_intent",
+        "invalid_policy",
+        "unverified_context",
+        "clock_unavailable",
+        "wrong_audience",
+        "stale_policy",
+        "expired_intent",
+        "revoked_session",
+        "unknown_grant",
+        "revoked_grant",
+        "grant_mismatch",
+        "grant_expired",
+        "resource_unavailable",
+        "capability_unavailable",
+        "audit_unavailable",
+        "recovery_required",
+        "stale_status_revision",
+        "confirmation_required",
+        "consent_required"
+      ]
+    },
+    "policy_revision": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "grants_authority": {
+      "const": false
+    },
+    "actuation_enabled": {
+      "const": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "eligible_for_host_review"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": {
+            "const": "eligible"
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "policy_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reason": {
+            "enum": [
+              "invalid_intent",
+              "invalid_policy",
+              "unverified_context",
+              "clock_unavailable",
+              "wrong_audience",
+              "stale_policy",
+              "expired_intent",
+              "revoked_session",
+              "unknown_grant",
+              "revoked_grant",
+              "grant_mismatch",
+              "grant_expired",
+              "resource_unavailable",
+              "capability_unavailable",
+              "audit_unavailable",
+              "recovery_required",
+              "stale_status_revision",
+              "confirmation_required",
+              "consent_required"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

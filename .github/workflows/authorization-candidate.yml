@@ -1,0 +1,46 @@
+name: PERIPH 0.3A offline authorization candidate
+on:
+  push:
+    paths:
+      - 'authorization_candidate/**'
+      - 'contracts/authorization/**'
+      - 'docs/OPERATOR-AUTHORIZATION.md'
+      - '.github/workflows/authorization-candidate.yml'
+  pull_request:
+    paths:
+      - 'authorization_candidate/**'
+      - 'contracts/authorization/**'
+      - 'docs/OPERATOR-AUTHORIZATION.md'
+      - '.github/workflows/authorization-candidate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authorization-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
+          python -m pip check
+      - run: python -m unittest discover -s authorization_candidate/tests -p 'test_*.py' -v
+      - run: python -O -m unittest discover -s authorization_candidate/tests -p 'test_*.py' -v
+      - name: Ensure runtime wheel allowlist excludes candidate authorization
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          tree = ast.parse(Path("packaging/build_host_wheel.py").read_text())
+          modules = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "MODULES" for t in n.targets))
+          if set(modules) != {"host_broker.py", "control_cli.py", "contract_validation.py", "recovery_state.py"}:
+              raise SystemExit("unexpected runtime wheel change")
+          for path in Path("services/peripheral-manager").glob("*.py"):
+              if "authorization_candidate" in path.read_text():
+                  raise SystemExit("offline evaluator imported by runtime")
+          PY

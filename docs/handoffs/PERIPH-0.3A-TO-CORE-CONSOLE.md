@@ -1,0 +1,7 @@
+# PERIPH-0.3A → Core / Console — candidate authorization boundary
+
+Reference: PERIPH-EXTRACT-01 accepted main a36c2d7c42b0bb3f4b2e4c78b42b999be0fac6cd. Read [the candidate architecture](../OPERATOR-AUTHORIZATION.md). No normative change, no runtime integration or new authority.
+
+Core: review compatibility of external operator subject/issuer/session/client references, exact host/robot/peripheral scope, receiver-qualified monotonic lifetime and non-authoritative eligibility with Core-B/C and EXT-01A. The policy authority remains external; PERIPH is the lifecycle enforcement owner; no Life identity or release trust grants operational permission. Do not introduce a second identity registry. Request review of future external proof/resolver and effect-gate integration; no promotion until owner agreement.
+
+Console: retain read-only PERIPH-CONSOLE-01. The candidate vocabulary separates peripheral.status.read from acquisition.start/stop and from raw observation/media/evidence access. UI roles, CSRF, same UID and manifest capabilities do not establish operator authorization. Do not implement browser lifecycle actions or mount broker socket; future authenticated gateway and broker-side enforcement require 0.3B/C. Display unknown/unavailable/reconciliation_required separately; no implicit dispatch or retries. No new API or transport in 0.3A. Treat every decision report as non-authoritative metadata; do not use it as a credential. 
