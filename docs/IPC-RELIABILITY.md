@@ -1,6 +1,6 @@
 # PERIPH-EXTRACT-01C — IPC reliability and failure semantics
 
-Status: source candidate; non-actuating, local-only; not approved for commissioning.
+Status: historical 01C source candidate; non-actuating, local-only; not approved for commissioning. **01E.1 supersedes the volatile-only recovery behavior:** see [DURABLE-RECOVERY.md](DURABLE-RECOVERY.md) for the production journal and epoch allocation. The nominal timing and wire semantics below remain.
 Baseline: standalone candidate 454eb0590068813f6b7c6daf1033fea00617814b.
 Original Console source remains immutable at b331dd32415eeda0d107676920a6dea91170cc4f.
 Seven existing candidate JSON schemas are byte-identical. No new IPC operation, privilege, endpoint, hardware driver or runtime dependency.

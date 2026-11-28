@@ -32,6 +32,7 @@ import sys
 import time
 
 from contract_validation import validate_instance
+from recovery_state import RecoveryError, RecoveryStore
 
 SCHEMA = "openrgd.peripheral-host-request.v0.1-candidate"
 RESULT_SCHEMA = "openrgd.peripheral-host-response.v0.1-candidate"
@@ -253,15 +254,23 @@ def run_unit(action: str, unit: str, runner=subprocess.run) -> bool | None:
 class Broker:
     """Single-threaded manager; an independent host broker instance is the
     sole state-revision allocator. No state or credentials go into Console."""
-    def __init__(self, config: dict, runner=subprocess.run):
+    def __init__(self, config: dict, runner=subprocess.run, *, recovery=None):
         self.services = {(s["robot_id"], s["peripheral_id"]): s
                          for s in config["services"]}
         self.runner = runner
-        self.revisions = {key: secrets.randbelow((1 << 48) - 1) + 1
-                          for key in self.services}
+        self.recovery = recovery
+        self.revision_ceiling = MAX_SAFE_REVISION
+        if recovery is not None:
+            low, self.revision_ceiling = recovery.allocate_epoch()
+            self.revisions = {key: low for key in self.services}
+        else:
+            # Legacy mock/preflight mode only. Production serve requires state.
+            self.revisions = {key: secrets.randbelow((1 << 48) - 1) + 1
+                              for key in self.services}
         self.signatures: dict[tuple[str, str], tuple] = {}
         self.history: OrderedDict[str, tuple[dict, dict]] = OrderedDict()
-        self.uncertain: set[tuple[str, str]] = set()
+        self.uncertain: set[tuple[str, str]] = (
+            recovery.pending_keys() if recovery is not None else set())
 
     def _status(self, key: tuple[str, str]) -> dict:
         svc = self.services[key]
@@ -269,6 +278,8 @@ class Broker:
         presence, binding_verified = device_identity(svc, self.runner)
         signature = lifecycle, enabled, available, presence, binding_verified
         if key in self.signatures and signature != self.signatures[key]:
+            if self.revisions[key] >= self.revision_ceiling:
+                raise RecoveryError("revision_epoch_exhausted")
             self.revisions[key] += 1
         self.signatures[key] = signature
         return {
@@ -350,13 +361,17 @@ class Broker:
             return deepcopy(past)
 
         state = self._status(key)
+        recovery_failed = self.recovery is not None and not self.recovery.healthy
         if req["action"] == "status":
-            return self._reply(req, state, "status",
-                               "reconciliation_required" if key in self.uncertain else None)
+            reason = ("recovery_unavailable" if recovery_failed else
+                      "reconciliation_required" if key in self.uncertain else None)
+            return self._reply(req, state, "status", reason)
 
         def reject(reason: str) -> dict:
             return self._record(req, self._reply(req, state, "rejected", reason))
 
+        if recovery_failed or (self.recovery is None and self.runner is subprocess.run):
+            return reject("recovery_unavailable")
         if key in self.uncertain:
             return reject("reconciliation_required")
         if req["expected_status_revision"] != state["status_revision"]:
@@ -377,7 +392,7 @@ class Broker:
             result = self._reply(req, state, "no_op")
         elif start and (not present or not verified):
             return reject("device_missing_or_unverified")
-        elif state["status_revision"] >= MAX_SAFE_REVISION - 1:
+        elif state["status_revision"] >= self.revision_ceiling - 1:
             return reject("revision_exhausted")
         elif may_dispatch is not None and not may_dispatch():
             return reject("client_disconnected")
@@ -387,12 +402,18 @@ class Broker:
             # dispatch with its old revision within this broker epoch.
             self.revisions[key] += 1
             self.uncertain.add(key)
+            if self.recovery is not None:
+                # The intent must be durable BEFORE the only dispatch site.
+                # On write failure the store is poisoned and no command is sent.
+                self.recovery.begin(key, req)
             action = "start" if start else "stop"
             success = run_unit(action, self.services[key]["service_ref"], self.runner)
             after = self._status(key)
             target = "running" if start else "stopped"
             if (success is True and after["publisher"]["manager_available"]
                     and after["publisher"]["lifecycle"] == target):
+                if self.recovery is not None:
+                    self.recovery.complete(key, req["request_id"])
                 self.uncertain.remove(key)
                 result = self._reply(req, after, "accepted")
             else:
@@ -450,6 +471,8 @@ def handle_connection(manager: Broker, conn: socket.socket) -> None:
 
 
 def serve(manager: Broker, path: Path, *, stop_event=None, register_handlers=True) -> None:
+    if manager.recovery is None and manager.runner is subprocess.run:
+        raise RecoveryError("durable_recovery_required")
     ensure_socket_dir(path)
     if path.exists() or path.is_symlink():
         raise FileExistsError("existing broker socket: refuse to replace a live/unknown socket")
@@ -497,19 +520,47 @@ def serve(manager: Broker, path: Path, *, stop_event=None, register_handlers=Tru
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--allowlist", type=Path, required=True)
+    p.add_argument("--state-dir", type=Path)
+    p.add_argument("--confirm", default="")
+    p.add_argument("--robot-id")
+    p.add_argument("--peripheral-id")
+    p.add_argument("--request-id")
+    p.add_argument("--review-ref")
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--serve", action="store_true")
     group.add_argument("--preflight", action="store_true")
+    group.add_argument("--init-state", action="store_true")
+    group.add_argument("--inspect-recovery", action="store_true")
+    group.add_argument("--ack-reconciled", action="store_true")
     args = p.parse_args(argv)
+    if not args.preflight and args.state_dir is None:
+        p.error("--state-dir is required; no automatic initialization")
     config = read_allowlist(args.allowlist)
-    manager = Broker(config)
     if args.preflight:
+        manager = Broker(config)
         for key in manager.services:
             status = manager._status(key)
             print(json.dumps({"robot_id": key[0], "peripheral_id": key[1], **status,
                               "actuation_enabled": False}, separators=(",", ":")))
         return 0
-    serve(manager, socket_path())
+    if args.init_state:
+        if args.confirm != "INITIALIZE PERIPH RECOVERY":
+            p.error("explicit initialization confirmation required")
+        RecoveryStore.initialize(args.state_dir, config)
+        return 0
+    with RecoveryStore(args.state_dir, config) as store:
+        if args.inspect_recovery:
+            print(json.dumps(store.inspect(), indent=2))
+            return 0
+        if args.ack_reconciled:
+            if not all((args.robot_id, args.peripheral_id, args.request_id, args.review_ref)):
+                p.error("explicit scope, pending request ID and external review reference required")
+            store.acknowledge((args.robot_id, args.peripheral_id), args.request_id,
+                              args.review_ref, args.confirm)
+            print("External reconciliation asserted; no service command executed")
+            return 0
+        manager = Broker(config, recovery=store)
+        serve(manager, socket_path())
     return 0
 
 

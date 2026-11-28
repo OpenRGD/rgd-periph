@@ -1,6 +1,6 @@
 # PERIPH-EXTRACT-01D — Schema & Cross-Language Conformance
 
-Status: source-only candidate, no operational acceptance. Baseline: 01C `e4dba4e92e2ece152d7f06a8a3ce6b3c10582101`. Original seven candidate schema bytes, identifiers and five historical fixtures remain unchanged. No canonical promotion or new privileges.
+Status: 01D source-only candidate, no operational acceptance. [01E.1 durable recovery](DURABLE-RECOVERY.md) supersedes the earlier production epoch/quarantine limitations while preserving the shared fixture profile. Baseline: 01C `e4dba4e92e2ece152d7f06a8a3ce6b3c10582101`. Original seven candidate schema bytes, identifiers and five historical fixtures remain unchanged. No canonical promotion or new privileges.
 
 ## Three distinct validation layers
 

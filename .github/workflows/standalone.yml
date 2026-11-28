@@ -39,7 +39,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - run: cargo test --workspace
+      - name: Resolve candidate Cargo lock for release review
+        run: |
+          cargo generate-lockfile
+          cat Cargo.lock
+      - run: cargo test --locked --workspace
       - run: cargo fmt --all -- --check
   host-mock:
     runs-on: ubuntu-latest

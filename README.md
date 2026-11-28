@@ -27,7 +27,7 @@ python3 -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py'
 python3 -m unittest discover -s conformance/tests -p 'test_*.py' -v
 ```
 
-Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The original JS regressions remain, alongside [full Draft 2020-12 schema and managed-host cross-language conformance](docs/CONFORMANCE.md). The Python IPC boundary now validates the existing schemas with jsonschema and RFC 3339 format checking; direct dependency versions are pinned in requirements-host.txt. The Rust library stays a typed policy domain, not a wire ingress. [IPC reliability and failure semantics](docs/IPC-RELIABILITY.md) documents volatile quarantine and restart limits. Reproducible transitive locks, durable recovery, wider consumer/authorization conformance, packaging and deployment approval remain open.
+Tests use fixture/mock service ownership and a temporary Unix socket. They do not install systemd units or access real hardware. The original JS regressions remain, alongside [full Draft 2020-12 schema and managed-host cross-language conformance](docs/CONFORMANCE.md). The Python IPC boundary now validates the existing schemas with jsonschema and RFC 3339 format checking; direct dependency versions are pinned in requirements-host.txt. The Rust library stays a typed policy domain, not a wire ingress. [IPC reliability and failure semantics](docs/IPC-RELIABILITY.md) documents IPC failure semantics and durable recovery. See [durable recovery](docs/DURABLE-RECOVERY.md) for the new state journal. Release packaging, wider consumer/authorization conformance and deployment approval remain open.
 
 ## Provenance and license
 
