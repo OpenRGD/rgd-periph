@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:console:peripheral-status:v0.1-candidate",
+  "title": "Independent device/service/stream and control availability status",
+  "description": "Design-only candidate. No host device access or operational control is installed by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "robot_id",
+    "peripheral_id",
+    "status_revision",
+    "reported_at",
+    "device",
+    "publisher",
+    "streams",
+    "controls",
+    "actuation_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "console.peripheral-status.v0.1-candidate"
+    },
+    "robot_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "peripheral_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "status_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "presence",
+        "binding_verified",
+        "checked_at"
+      ],
+      "properties": {
+        "presence": {
+          "enum": [
+            "present",
+            "absent",
+            "busy",
+            "unknown"
+          ]
+        },
+        "binding_verified": {
+          "type": "boolean"
+        },
+        "checked_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lifecycle",
+        "desired_state",
+        "manager_available",
+        "enabled_on_boot",
+        "reported_at",
+        "error_code"
+      ],
+      "properties": {
+        "lifecycle": {
+          "enum": [
+            "not_installed",
+            "stopped",
+            "starting",
+            "running",
+            "stopping",
+            "failed",
+            "busy",
+            "unknown"
+          ]
+        },
+        "desired_state": {
+          "enum": [
+            "running",
+            "stopped",
+            "unknown"
+          ]
+        },
+        "manager_available": {
+          "type": "boolean"
+        },
+        "enabled_on_boot": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "reported_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        }
+      }
+    },
+    "streams": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stream_id",
+          "state",
+          "source_kind",
+          "last_received_at",
+          "age_ms"
+        ],
+        "properties": {
+          "stream_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]{0,99}$"
+          },
+          "state": {
+            "enum": [
+              "live",
+              "stale",
+              "no_source",
+              "invalid",
+              "unknown"
+            ]
+          },
+          "source_kind": {
+            "enum": [
+              "physical",
+              "simulated",
+              "unknown"
+            ]
+          },
+          "last_received_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "age_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "can_start",
+        "can_stop",
+        "reason"
+      ],
+      "properties": {
+        "can_start": {
+          "type": "boolean"
+        },
+        "can_stop": {
+          "type": "boolean"
+        },
+        "reason": {
+          "enum": [
+            "ready",
+            "manager_unavailable",
+            "not_authorized",
+            "unsupported",
+            "unmanaged_owner",
+            "device_missing",
+            "device_busy",
+            "transition_in_progress",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "actuation_enabled": {
+      "const": false
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": "console.peripheral-descriptor.v0.1-candidate",
+  "robot_id": "paky-01",
+  "peripheral_id": "pov-camera-01",
+  "display_name": "Esempio futuro: camera POV (non installata tramite Manager)",
+  "category": "camera",
+  "source_kind": "physical",
+  "binding": {
+    "transport": "usb_video",
+    "binding_ref": "paky01:camera_pov_stable_identity",
+    "verification": "not_configured"
+  },
+  "publisher": {
+    "publisher_id": "paky01-pov-video-owner",
+    "host_id": "paky01-minipc",
+    "manager": "systemd_user",
+    "service_ref": "openrgd-paky01-pov-video.service",
+    "resource_lock": "paky01:pov_camera_exclusive",
+    "ownership": "exclusive_device_owner",
+    "startup_policy": "manual"
+  },
+  "streams": [
+    {
+      "stream_id": "video.frames",
+      "sample_schema": "openrgd.video-frame.v0.1-proposed",
+      "data_class": "privacy_sensitive_media",
+      "freshness_ms": 1500,
+      "nominal_rate_hz": 30,
+      "fanout": "multiple_read_only_consumers",
+      "buffer_policy": "latest_only"
+    },
+    {
+      "stream_id": "vision.detections",
+      "sample_schema": "openrgd.vision-detections.v0.1-proposed",
+      "data_class": "sensor_observation",
+      "freshness_ms": 1200,
+      "nominal_rate_hz": 10,
+      "fanout": "multiple_read_only_consumers",
+      "buffer_policy": "latest_only"
+    }
+  ],
+  "capabilities": [
+    "observation.read"
+  ],
+  "actuation_enabled": false
+}

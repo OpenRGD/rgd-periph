@@ -1,0 +1,35 @@
+{
+  "schema_version": "console.peripheral-status.v0.1-candidate",
+  "robot_id": "paky-01",
+  "peripheral_id": "torso-imu-01",
+  "status_revision": 0,
+  "reported_at": "2026-10-25T14:00:00Z",
+  "device": {
+    "presence": "unknown",
+    "binding_verified": false,
+    "checked_at": null
+  },
+  "publisher": {
+    "lifecycle": "not_installed",
+    "desired_state": "unknown",
+    "manager_available": false,
+    "enabled_on_boot": null,
+    "reported_at": null,
+    "error_code": "manager_not_installed"
+  },
+  "streams": [
+    {
+      "stream_id": "imu.sensor_axes",
+      "state": "no_source",
+      "source_kind": "unknown",
+      "last_received_at": null,
+      "age_ms": null
+    }
+  ],
+  "controls": {
+    "can_start": false,
+    "can_stop": false,
+    "reason": "manager_unavailable"
+  },
+  "actuation_enabled": false
+}

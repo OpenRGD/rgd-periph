@@ -1,0 +1,1007 @@
+{
+  "version": "periph.conformance.wire.v0.1-candidate",
+  "description": "Synthetic fixtures only. Schema-valid is not operationally authorized.",
+  "documents": {
+    "descriptor": {
+      "schema_version": "console.peripheral-descriptor.v0.1-candidate",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "display_name": "Synthetic IMU fixture",
+      "category": "imu",
+      "source_kind": "physical",
+      "binding": {
+        "transport": "usb_serial",
+        "binding_ref": "fixture:imu-a",
+        "verification": "operator_verified"
+      },
+      "publisher": {
+        "publisher_id": "fixture-publisher",
+        "host_id": "fixture-host",
+        "manager": "systemd_user",
+        "service_ref": "openrgd-fixture-imu.service",
+        "resource_lock": "fixture:imu-a",
+        "ownership": "exclusive_device_owner",
+        "startup_policy": "manual"
+      },
+      "streams": [
+        {
+          "stream_id": "imu.axes",
+          "sample_schema": "openrgd.imu-sample.v0.1-candidate",
+          "data_class": "sensor_observation",
+          "freshness_ms": 3000,
+          "nominal_rate_hz": 10,
+          "fanout": "multiple_read_only_consumers",
+          "buffer_policy": "latest_only"
+        }
+      ],
+      "capabilities": [
+        "observation.read",
+        "acquisition.start",
+        "acquisition.stop"
+      ],
+      "actuation_enabled": false
+    },
+    "status": {
+      "schema_version": "console.peripheral-status.v0.1-candidate",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "status_revision": 42,
+      "reported_at": "2026-01-01T00:00:00Z",
+      "device": {
+        "presence": "present",
+        "binding_verified": true,
+        "checked_at": "2026-01-01T00:00:00Z"
+      },
+      "publisher": {
+        "lifecycle": "stopped",
+        "desired_state": "stopped",
+        "manager_available": true,
+        "enabled_on_boot": false,
+        "reported_at": "2026-01-01T00:00:00Z",
+        "error_code": null
+      },
+      "streams": [
+        {
+          "stream_id": "imu.axes",
+          "state": "no_source",
+          "source_kind": "unknown",
+          "last_received_at": null,
+          "age_ms": null
+        }
+      ],
+      "controls": {
+        "can_start": true,
+        "can_stop": true,
+        "reason": "ready"
+      },
+      "actuation_enabled": false
+    },
+    "action": {
+      "schema_version": "console.peripheral-action.v0.1-candidate",
+      "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "action": "acquisition.start",
+      "expected_status_revision": 42
+    },
+    "action-result": {
+      "schema_version": "console.peripheral-action-result.v0.1-candidate",
+      "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "action": "acquisition.start",
+      "disposition": "accepted",
+      "publisher_lifecycle": "running",
+      "status_revision": 43,
+      "observed_at": "2026-01-01T00:00:00Z",
+      "error_code": null,
+      "actuation_enabled": false
+    },
+    "host-request": {
+      "schema_version": "openrgd.peripheral-host-request.v0.1-candidate",
+      "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "action": "acquisition.start",
+      "expected_status_revision": 42
+    },
+    "host-response": {
+      "schema_version": "openrgd.peripheral-host-response.v0.1-candidate",
+      "request_id": "d64fda80-3941-40f1-9c31-2f100a5578bc",
+      "robot_id": "conformance-robot",
+      "peripheral_id": "imu-a",
+      "observed_at": "2026-01-01T00:00:00Z",
+      "device": {
+        "presence": "present",
+        "binding_verified": true
+      },
+      "publisher": {
+        "lifecycle": "running",
+        "manager_available": true,
+        "enabled_on_boot": false,
+        "service_ref": "openrgd-fixture-imu.service"
+      },
+      "status_revision": 43,
+      "disposition": "accepted",
+      "error_code": null,
+      "actuation_enabled": false
+    },
+    "host-allowlist": {
+      "schema_version": "openrgd.peripheral-host-allowlist.v0.1-candidate",
+      "services": [
+        {
+          "robot_id": "conformance-robot",
+          "peripheral_id": "imu-a",
+          "service_ref": "openrgd-fixture-imu.service",
+          "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+          "usb_vid_pid": "1a86:7523",
+          "resource_lock": "fixture:imu-a"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "descriptor-valid-baseline",
+      "contract": "descriptor",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "status-valid-baseline",
+      "contract": "status",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "action-valid-baseline",
+      "contract": "action",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "action-result-valid-baseline",
+      "contract": "action-result",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "host-request-valid-baseline",
+      "contract": "host-request",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "host-response-valid-baseline",
+      "contract": "host-response",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "host-allowlist-valid-baseline",
+      "contract": "host-allowlist",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "id": "descriptor-unknown-top-field",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "unexpected",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "descriptor-missing-binding",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "binding",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "descriptor-invalid-identity",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "robot_id",
+          "op": "set",
+          "value": "Robot!"
+        }
+      ]
+    },
+    {
+      "id": "descriptor-empty-streams",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams",
+          "op": "set",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "descriptor-duplicate-capabilities",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "capabilities",
+          "op": "set",
+          "value": [
+            "observation.read",
+            "observation.read"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "descriptor-motor-authority",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "actuation_enabled",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "descriptor-unknown-source",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "source_kind",
+          "op": "set",
+          "value": "unknown"
+        }
+      ]
+    },
+    {
+      "id": "descriptor-out-of-bounds-freshness",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams/0/freshness_ms",
+          "op": "set",
+          "value": 49
+        }
+      ]
+    },
+    {
+      "id": "descriptor-out-of-bounds-rate",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams/0/nominal_rate_hz",
+          "op": "set",
+          "value": 1001
+        }
+      ]
+    },
+    {
+      "id": "descriptor-null-rate",
+      "contract": "descriptor",
+      "valid": true,
+      "changes": [
+        {
+          "path": "streams/0/nominal_rate_hz",
+          "op": "set",
+          "value": null
+        }
+      ]
+    },
+    {
+      "id": "descriptor-required-nullable-rate",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams/0/nominal_rate_hz",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "descriptor-duplicate-stream-object",
+      "contract": "descriptor",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams",
+          "op": "set",
+          "value": [
+            {
+              "stream_id": "imu.axes",
+              "sample_schema": "openrgd.imu-sample.v0.1-candidate",
+              "data_class": "sensor_observation",
+              "freshness_ms": 3000,
+              "nominal_rate_hz": 10,
+              "fanout": "multiple_read_only_consumers",
+              "buffer_policy": "latest_only"
+            },
+            {
+              "stream_id": "imu.axes",
+              "sample_schema": "openrgd.imu-sample.v0.1-candidate",
+              "data_class": "sensor_observation",
+              "freshness_ms": 3000,
+              "nominal_rate_hz": 10,
+              "fanout": "multiple_read_only_consumers",
+              "buffer_policy": "latest_only"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "descriptor-privacy-sensitive-multistream",
+      "contract": "descriptor",
+      "valid": true,
+      "changes": [
+        {
+          "path": "streams",
+          "op": "set",
+          "value": [
+            {
+              "stream_id": "imu.axes",
+              "sample_schema": "openrgd.imu-sample.v0.1-candidate",
+              "data_class": "sensor_observation",
+              "freshness_ms": 3000,
+              "nominal_rate_hz": 10,
+              "fanout": "multiple_read_only_consumers",
+              "buffer_policy": "latest_only"
+            },
+            {
+              "stream_id": "media.preview",
+              "sample_schema": "openrgd.imu-sample.v0.1-candidate",
+              "data_class": "privacy_sensitive_media",
+              "freshness_ms": 3000,
+              "nominal_rate_hz": 10,
+              "fanout": "multiple_read_only_consumers",
+              "buffer_policy": "latest_only"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status-invalid-date-time",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "reported_at",
+          "op": "set",
+          "value": "2026-02-30T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "status-missing-offset",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "reported_at",
+          "op": "set",
+          "value": "2026-01-01T00:00:00"
+        }
+      ]
+    },
+    {
+      "id": "status-bool-revision",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "status_revision",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "status-negative-age",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "streams/0/age_ms",
+          "op": "set",
+          "value": -1
+        }
+      ]
+    },
+    {
+      "id": "status-unknown-control-reason",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "controls/reason",
+          "op": "set",
+          "value": "guess"
+        }
+      ]
+    },
+    {
+      "id": "status-required-nullable-field",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "publisher/reported_at",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "status-nested-additional-field",
+      "contract": "status",
+      "valid": false,
+      "changes": [
+        {
+          "path": "device/command",
+          "op": "set",
+          "value": "fixture"
+        }
+      ]
+    },
+    {
+      "id": "status-unknown-age-and-time",
+      "contract": "status",
+      "valid": true,
+      "changes": [
+        {
+          "path": "streams/0/age_ms",
+          "op": "set",
+          "value": null
+        },
+        {
+          "path": "streams/0/last_received_at",
+          "op": "set",
+          "value": null
+        }
+      ]
+    },
+    {
+      "id": "action-invalid-uuid",
+      "contract": "action",
+      "valid": false,
+      "changes": [
+        {
+          "path": "request_id",
+          "op": "set",
+          "value": "invalid"
+        }
+      ]
+    },
+    {
+      "id": "action-unknown-operation",
+      "contract": "action",
+      "valid": false,
+      "changes": [
+        {
+          "path": "action",
+          "op": "set",
+          "value": "motor.enable"
+        }
+      ]
+    },
+    {
+      "id": "action-missing-revision",
+      "contract": "action",
+      "valid": false,
+      "changes": [
+        {
+          "path": "expected_status_revision",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "action-negative-revision",
+      "contract": "action",
+      "valid": false,
+      "changes": [
+        {
+          "path": "expected_status_revision",
+          "op": "set",
+          "value": -1
+        }
+      ]
+    },
+    {
+      "id": "action-wrong-schema-version",
+      "contract": "action",
+      "valid": false,
+      "changes": [
+        {
+          "path": "schema_version",
+          "op": "set",
+          "value": "console.peripheral-action.v9"
+        }
+      ]
+    },
+    {
+      "id": "result-invalid-disposition",
+      "contract": "action-result",
+      "valid": false,
+      "changes": [
+        {
+          "path": "disposition",
+          "op": "set",
+          "value": "unknown"
+        }
+      ]
+    },
+    {
+      "id": "result-invalid-observed-at",
+      "contract": "action-result",
+      "valid": false,
+      "changes": [
+        {
+          "path": "observed_at",
+          "op": "set",
+          "value": "2026-99-99T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "result-missing-error-field",
+      "contract": "action-result",
+      "valid": false,
+      "changes": [
+        {
+          "path": "error_code",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "result-motor-authority",
+      "contract": "action-result",
+      "valid": false,
+      "changes": [
+        {
+          "path": "actuation_enabled",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "result-unknown-outcome-wire-compatible",
+      "contract": "action-result",
+      "valid": true,
+      "changes": [
+        {
+          "path": "disposition",
+          "op": "set",
+          "value": "failed"
+        },
+        {
+          "path": "error_code",
+          "op": "set",
+          "value": "systemd_outcome_unknown"
+        }
+      ]
+    },
+    {
+      "id": "host-status-no-revision",
+      "contract": "host-request",
+      "valid": true,
+      "changes": [
+        {
+          "path": "action",
+          "op": "set",
+          "value": "status"
+        },
+        {
+          "path": "expected_status_revision",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "host-status-forbids-revision",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "action",
+          "op": "set",
+          "value": "status"
+        }
+      ]
+    },
+    {
+      "id": "host-start-requires-revision",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "expected_status_revision",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "host-stop-requires-revision",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "action",
+          "op": "set",
+          "value": "acquisition.stop"
+        },
+        {
+          "path": "expected_status_revision",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "host-forbids-extra-command",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "command",
+          "op": "set",
+          "value": "fixture"
+        }
+      ]
+    },
+    {
+      "id": "host-bool-revision",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "expected_status_revision",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "host-fractional-revision",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "expected_status_revision",
+          "op": "set",
+          "value": 42.5
+        }
+      ]
+    },
+    {
+      "id": "host-invalid-uuid",
+      "contract": "host-request",
+      "valid": false,
+      "changes": [
+        {
+          "path": "request_id",
+          "op": "set",
+          "value": "invalid"
+        }
+      ]
+    },
+    {
+      "id": "host-response-invalid-date-time",
+      "contract": "host-response",
+      "valid": false,
+      "changes": [
+        {
+          "path": "observed_at",
+          "op": "set",
+          "value": "not-a-date"
+        }
+      ]
+    },
+    {
+      "id": "host-response-missing-identity",
+      "contract": "host-response",
+      "valid": false,
+      "changes": [
+        {
+          "path": "robot_id",
+          "op": "remove"
+        }
+      ]
+    },
+    {
+      "id": "host-response-invalid-nested-lifecycle",
+      "contract": "host-response",
+      "valid": false,
+      "changes": [
+        {
+          "path": "publisher/lifecycle",
+          "op": "set",
+          "value": "maybe"
+        }
+      ]
+    },
+    {
+      "id": "host-response-extra-nested-field",
+      "contract": "host-response",
+      "valid": false,
+      "changes": [
+        {
+          "path": "publisher/command",
+          "op": "set",
+          "value": "fixture"
+        }
+      ]
+    },
+    {
+      "id": "host-response-authority",
+      "contract": "host-response",
+      "valid": false,
+      "changes": [
+        {
+          "path": "actuation_enabled",
+          "op": "set",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "host-response-quarantine-status",
+      "contract": "host-response",
+      "valid": true,
+      "changes": [
+        {
+          "path": "disposition",
+          "op": "set",
+          "value": "status"
+        },
+        {
+          "path": "error_code",
+          "op": "set",
+          "value": "reconciliation_required"
+        }
+      ]
+    },
+    {
+      "id": "host-response-uncertain-failure",
+      "contract": "host-response",
+      "valid": true,
+      "changes": [
+        {
+          "path": "disposition",
+          "op": "set",
+          "value": "failed"
+        },
+        {
+          "path": "error_code",
+          "op": "set",
+          "value": "systemd_outcome_unknown"
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-empty",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services",
+          "op": "set",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-13",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services",
+          "op": "set",
+          "value": [
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-invalid-unit",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services/0/service_ref",
+          "op": "set",
+          "value": "evil.service"
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-device-outside-by-path",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services/0/device_by_path",
+          "op": "set",
+          "value": "/dev/ttyUSB0"
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-invalid-vid-pid",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services/0/usb_vid_pid",
+          "op": "set",
+          "value": "BAD"
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-extra-field",
+      "contract": "host-allowlist",
+      "valid": false,
+      "changes": [
+        {
+          "path": "services/0/command",
+          "op": "set",
+          "value": "fixture"
+        }
+      ]
+    },
+    {
+      "id": "host-allowlist-valid-second-robot",
+      "contract": "host-allowlist",
+      "valid": true,
+      "changes": [
+        {
+          "path": "services",
+          "op": "set",
+          "value": [
+            {
+              "robot_id": "conformance-robot",
+              "peripheral_id": "imu-a",
+              "service_ref": "openrgd-fixture-imu.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-imu-a",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-a"
+            },
+            {
+              "robot_id": "fixture-b",
+              "peripheral_id": "imu-b",
+              "service_ref": "openrgd-fixture-b.service",
+              "device_by_path": "/dev/serial/by-path/fixture-only-b",
+              "usb_vid_pid": "1a86:7523",
+              "resource_lock": "fixture:imu-b"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

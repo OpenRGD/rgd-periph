@@ -1,0 +1,40 @@
+{
+  "schema_version": "periph.distribution-manifest.v0.1-candidate",
+  "module_id": "org.openrgd.periph",
+  "version": "0.1.0-alpha.1",
+  "python_distribution": "rgd-periph-host",
+  "python_version": "0.1.0a1",
+  "maturity": "candidate",
+  "publisher": "OpenRGD",
+  "license": "MIT",
+  "repository": "https://github.com/OpenRGD/rgd-periph",
+  "distribution": {
+    "kind": "source_archive_and_python_wheel",
+    "tested_profile": "Linux x86_64 / CPython 3.12 / Rust 1.100.0",
+    "rust_library": "rgd-periph-core",
+    "python_entrypoints": [
+      "rgd-periph-broker",
+      "rgd-periph-control"
+    ],
+    "dependencies_lock": "requirements-host.lock.txt",
+    "rust_lock": "Cargo.lock",
+    "runtime_lock_kind": "exact_versions_and_wheel_sha256_linux_x86_64_cp312"
+  },
+  "interfaces": {
+    "local_ipc": "openrgd.peripheral-host-request.v0.1-candidate",
+    "response": "openrgd.peripheral-host-response.v0.1-candidate",
+    "consumer_mode": "read_only_first_separate_review"
+  },
+  "safety": {
+    "non_actuating": true,
+    "auto_install": false,
+    "auto_start": false,
+    "operator_authorization": false,
+    "requires_explicit_recovery_state": true,
+    "physical_commissioning": false
+  },
+  "registry": {
+    "registration_status": "not_registered",
+    "reason": "Existing registry candidate requires pinned_git_cargo binary; Python service and Rust library need separate reviewed distribution contract"
+  }
+}

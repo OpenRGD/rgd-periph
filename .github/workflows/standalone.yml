@@ -1,0 +1,162 @@
+name: PERIPH standalone extraction
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/verify_provenance.py
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/peripheral-contract.test.mjs scripts/peripheral-host-contract.test.mjs
+  rust-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.100.0'
+          components: rustfmt
+      - run: cargo test --locked --workspace
+      - run: cargo fmt --all -- --check
+  host-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: python -m pip check
+      - run: python -m py_compile services/peripheral-manager/*.py
+      - run: python -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py' -v
+  schema-conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: python -m pip check
+      - run: python -m unittest discover -s conformance/tests -p 'test_*.py' -v
+  distribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.100.0'
+      - name: Build independent Python wheels and prove same-input parity
+        run: |
+          python -m pip install --only-binary=:all: --no-deps setuptools==80.9.0 wheel==0.45.1 packaging==25.0
+          python packaging/build_host_wheel.py --output "$RUNNER_TEMP/first"
+          python packaging/build_host_wheel.py --output "$RUNNER_TEMP/second"
+          cmp "$RUNNER_TEMP"/first/*.whl "$RUNNER_TEMP"/second/*.whl
+          echo "PASS identical wheel bytes"
+      - name: Download pinned dependency wheels and smoke installed package offline
+        run: |
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          python -m pip download --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt --dest "$RUNNER_TEMP/wheelhouse"
+          (cd "$RUNNER_TEMP/wheelhouse" && sha256sum *.whl | sort -k2) | tee "$RUNNER_TEMP/dependency-wheel-SHA256SUMS"
+          python -m venv "$RUNNER_TEMP/smoke-venv"
+          PY="$RUNNER_TEMP/smoke-venv/bin/python"
+          "$PY" -m pip install --require-hashes --no-index --find-links "$RUNNER_TEMP/wheelhouse" --no-deps -r requirements-host.lock.txt
+          "$PY" -m pip install --no-index --no-deps "$RUNNER_TEMP"/first/*.whl
+          "$PY" -m pip check
+          "$RUNNER_TEMP/smoke-venv/bin/rgd-periph-broker" --help
+          "$RUNNER_TEMP/smoke-venv/bin/rgd-periph-control" --help
+          "$PY" packaging/smoke_installed.py
+      - name: Reproducible source distribution and locked Rust test from archive
+        run: |
+          mkdir -p "$RUNNER_TEMP/distribution" "$RUNNER_TEMP/unpacked"
+          git archive --format=tar --prefix=rgd-periph-0.1.0-alpha.1/ HEAD | gzip -n -9 > "$RUNNER_TEMP/distribution/rgd-periph-0.1.0-alpha.1.tar.gz"
+          git archive --format=tar --prefix=rgd-periph-0.1.0-alpha.1/ HEAD | gzip -n -9 > "$RUNNER_TEMP/source-again.tar.gz"
+          cmp "$RUNNER_TEMP/distribution/rgd-periph-0.1.0-alpha.1.tar.gz" "$RUNNER_TEMP/source-again.tar.gz"
+          tar -xzf "$RUNNER_TEMP/distribution/rgd-periph-0.1.0-alpha.1.tar.gz" -C "$RUNNER_TEMP/unpacked"
+          cargo test --locked --manifest-path "$RUNNER_TEMP/unpacked/rgd-periph-0.1.0-alpha.1/Cargo.toml" --workspace
+          cp "$RUNNER_TEMP"/first/*.whl "$RUNNER_TEMP/distribution/"
+          cp "$RUNNER_TEMP/dependency-wheel-SHA256SUMS" "$RUNNER_TEMP/distribution/"
+          git rev-parse HEAD > "$RUNNER_TEMP/distribution/SOURCE_COMMIT"
+          { python --version; python -m pip --version; rustc --version; cargo --version; } > "$RUNNER_TEMP/distribution/BUILD_ENV.txt"
+          (cd "$RUNNER_TEMP/distribution" && sha256sum *.whl *.tar.gz dependency-wheel-SHA256SUMS SOURCE_COMMIT BUILD_ENV.txt > SHA256SUMS && sha256sum -c SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: periph-0.1.0-alpha.1-candidate
+          path: ${{ runner.temp }}/distribution/
+          if-no-files-found: error
+          retention-days: 30
+  consumer-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: OpenRGD/rgd-console
+          ref: b331dd32415eeda0d107676920a6dea91170cc4f
+          path: .upstream/console
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: OpenRGD/rgd-reality-ingress
+          ref: 5372f758df79c93fc887f3858d878635447f4a4d
+          path: .upstream/ri
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: OpenRGD/rgd-modules
+          ref: 0268b3748042d04fd3561553616388368881e04a
+          path: .upstream/modules
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: python -m pip check
+      - name: Check exact public schema parity and registry distribution boundary
+        run: python packaging/check_consumer_compat.py --console .upstream/console --ri .upstream/ri --modules .upstream/modules
+      - name: Run original Console-to-RI offline compatibility suite
+        run: |
+          RI_CHECKOUT="$PWD/.upstream/ri" PYTHONPATH="$PWD/.upstream/ri/src" python -m unittest discover -s .upstream/console/scripts/tests -p 'test_ri_periph_compat.py' -v

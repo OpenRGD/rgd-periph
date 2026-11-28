@@ -1,0 +1,8 @@
+{
+  "schema_version": "console.peripheral-action.v0.1-candidate",
+  "request_id": "2bd48625-77e8-4a4b-ab5c-c910f0de2411",
+  "robot_id": "paky-01",
+  "peripheral_id": "torso-imu-01",
+  "action": "acquisition.start",
+  "expected_status_revision": 0
+}

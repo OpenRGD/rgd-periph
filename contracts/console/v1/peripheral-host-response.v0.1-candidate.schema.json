@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openrgd:host:peripheral-host-response:v0.1-candidate",
+  "title": "Host broker local response",
+  "description": "Internal same-UID Unix socket only. Not a public Console API, not an actuator interface.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "robot_id",
+    "peripheral_id",
+    "observed_at",
+    "device",
+    "publisher",
+    "status_revision",
+    "disposition",
+    "error_code",
+    "actuation_enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "openrgd.peripheral-host-response.v0.1-candidate"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "robot_id": {
+      "type": "string"
+    },
+    "peripheral_id": {
+      "type": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "presence",
+        "binding_verified"
+      ],
+      "properties": {
+        "presence": {
+          "enum": [
+            "present",
+            "absent",
+            "unknown"
+          ]
+        },
+        "binding_verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lifecycle",
+        "manager_available",
+        "enabled_on_boot",
+        "service_ref"
+      ],
+      "properties": {
+        "lifecycle": {
+          "enum": [
+            "not_installed",
+            "stopped",
+            "starting",
+            "running",
+            "stopping",
+            "failed",
+            "busy",
+            "unknown"
+          ]
+        },
+        "manager_available": {
+          "type": "boolean"
+        },
+        "enabled_on_boot": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "service_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "status_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "disposition": {
+      "enum": [
+        "status",
+        "accepted",
+        "no_op",
+        "rejected",
+        "failed"
+      ]
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "actuation_enabled": {
+      "const": false
+    }
+  }
+}
