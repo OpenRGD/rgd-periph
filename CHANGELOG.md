@@ -32,3 +32,5 @@
 - Package the single Python implementation with all seven original schemas, MIT and explicit entry points; verify installed package offline.
 - Lock tested Python transitive versions and Cargo dependencies; pin Rust toolchain and build twice for byte parity.
 - Preserve pinned public Console/RI interoperability with original tests; provide read-only consumer handoff and local distribution manifest, not registry enrollment.
+
+- Pin the eight tested runtime wheels by SHA-256; enforce hashes in online download and offline smoke install. Include build environment metadata with the candidate artifact.

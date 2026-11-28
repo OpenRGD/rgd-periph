@@ -18,7 +18,7 @@ Console is a future version-pinned client, not a required runtime dependency. No
 ## Offline developer checks
 
 ```sh
-python3 -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+python3 -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
 python3 -m pip check
 python3 scripts/verify_provenance.py
 node --test scripts/peripheral-contract.test.mjs scripts/peripheral-host-contract.test.mjs

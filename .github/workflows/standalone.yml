@@ -53,7 +53,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: |
-          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - run: python -m py_compile services/peripheral-manager/*.py
       - run: python -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py' -v
@@ -68,7 +68,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: |
-          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - run: python -m unittest discover -s conformance/tests -p 'test_*.py' -v
   distribution:
@@ -95,11 +95,11 @@ jobs:
       - name: Download pinned dependency wheels and smoke installed package offline
         run: |
           mkdir -p "$RUNNER_TEMP/wheelhouse"
-          python -m pip download --only-binary=:all: --no-deps -r requirements-host.lock.txt --dest "$RUNNER_TEMP/wheelhouse"
+          python -m pip download --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt --dest "$RUNNER_TEMP/wheelhouse"
           (cd "$RUNNER_TEMP/wheelhouse" && sha256sum *.whl | sort -k2) | tee "$RUNNER_TEMP/dependency-wheel-SHA256SUMS"
           python -m venv "$RUNNER_TEMP/smoke-venv"
           PY="$RUNNER_TEMP/smoke-venv/bin/python"
-          "$PY" -m pip install --no-index --find-links "$RUNNER_TEMP/wheelhouse" --no-deps -r requirements-host.lock.txt
+          "$PY" -m pip install --require-hashes --no-index --find-links "$RUNNER_TEMP/wheelhouse" --no-deps -r requirements-host.lock.txt
           "$PY" -m pip install --no-index --no-deps "$RUNNER_TEMP"/first/*.whl
           "$PY" -m pip check
           "$RUNNER_TEMP/smoke-venv/bin/rgd-periph-broker" --help
@@ -116,7 +116,8 @@ jobs:
           cp "$RUNNER_TEMP"/first/*.whl "$RUNNER_TEMP/distribution/"
           cp "$RUNNER_TEMP/dependency-wheel-SHA256SUMS" "$RUNNER_TEMP/distribution/"
           git rev-parse HEAD > "$RUNNER_TEMP/distribution/SOURCE_COMMIT"
-          (cd "$RUNNER_TEMP/distribution" && sha256sum *.whl *.tar.gz dependency-wheel-SHA256SUMS SOURCE_COMMIT > SHA256SUMS && sha256sum -c SHA256SUMS)
+          { python --version; python -m pip --version; rustc --version; cargo --version; } > "$RUNNER_TEMP/distribution/BUILD_ENV.txt"
+          (cd "$RUNNER_TEMP/distribution" && sha256sum *.whl *.tar.gz dependency-wheel-SHA256SUMS SOURCE_COMMIT BUILD_ENV.txt > SHA256SUMS && sha256sum -c SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
           name: periph-0.1.0-alpha.1-candidate
@@ -152,7 +153,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: |
-          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - name: Check exact public schema parity and registry distribution boundary
         run: python packaging/check_consumer_compat.py --console .upstream/console --ri .upstream/ri --modules .upstream/modules

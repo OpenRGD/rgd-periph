@@ -17,7 +17,8 @@
       "rgd-periph-control"
     ],
     "dependencies_lock": "requirements-host.lock.txt",
-    "rust_lock": "Cargo.lock"
+    "rust_lock": "Cargo.lock",
+    "runtime_lock_kind": "exact_versions_and_wheel_sha256_linux_x86_64_cp312"
   },
   "interfaces": {
     "local_ipc": "openrgd.peripheral-host-request.v0.1-candidate",
