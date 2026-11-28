@@ -52,7 +52,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: |
+          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - run: python -m py_compile services/peripheral-manager/*.py
       - run: python -m unittest discover -s services/peripheral-manager/tests -p 'test_*.py' -v
@@ -66,7 +67,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: |
+          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - run: python -m unittest discover -s conformance/tests -p 'test_*.py' -v
   distribution:
@@ -149,7 +151,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
+      - run: |
+          python -m pip install --only-binary=:all: --no-deps -r requirements-host.lock.txt
       - run: python -m pip check
       - name: Check exact public schema parity and registry distribution boundary
         run: python packaging/check_consumer_compat.py --console .upstream/console --ri .upstream/ri --modules .upstream/modules
