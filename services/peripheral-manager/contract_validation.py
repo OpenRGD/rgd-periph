@@ -9,7 +9,8 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-SCHEMA_ROOT = Path(__file__).resolve().parents[2] / "contracts" / "console" / "v1"
+SCHEMA_ROOT = (Path(__file__).resolve().parent / "schemas" if __package__ else
+               Path(__file__).resolve().parents[2] / "contracts" / "console" / "v1")
 NAMES = frozenset(("descriptor", "status", "action", "action-result",
                    "host-request", "host-response", "host-allowlist"))
 FORMATS = FormatChecker()

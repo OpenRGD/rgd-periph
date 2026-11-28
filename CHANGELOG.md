@@ -26,3 +26,9 @@
 - Require an explicitly initialized private state directory for production broker serving.
 - Persist a write-ahead pending intent before dispatch; clear only after acknowledged target or explicit offline external-review acknowledgement. Fail closed on state corruption, ownership/configuration mismatch or storage failure.
 - Reserve a persisted, bounded revision epoch before serving. Quarantine survives restart; no implicit reset or replay.
+
+### Candidate distribution and compatibility (01E.2/3)
+
+- Package the single Python implementation with all seven original schemas, MIT and explicit entry points; verify installed package offline.
+- Lock tested Python transitive versions and Cargo dependencies; pin Rust toolchain and build twice for byte parity.
+- Preserve pinned public Console/RI interoperability with original tests; provide read-only consumer handoff and local distribution manifest, not registry enrollment.

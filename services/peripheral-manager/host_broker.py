@@ -31,8 +31,12 @@ import subprocess
 import sys
 import time
 
-from contract_validation import validate_instance
-from recovery_state import RecoveryError, RecoveryStore
+if __package__:
+    from .contract_validation import validate_instance
+    from .recovery_state import RecoveryError, RecoveryStore
+else:
+    from contract_validation import validate_instance
+    from recovery_state import RecoveryError, RecoveryStore
 
 SCHEMA = "openrgd.peripheral-host-request.v0.1-candidate"
 RESULT_SCHEMA = "openrgd.peripheral-host-response.v0.1-candidate"
@@ -564,10 +568,14 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
+def entrypoint():
     try:
-        sys.exit(main())
+        return main()
     except (OSError, ValueError, RecursionError) as error:
         # Do not leak raw auth tokens, service env or user-supplied JSON.
         print(f"Peripheral broker unavailable: {type(error).__name__}", file=sys.stderr)
-        sys.exit(1)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(entrypoint())

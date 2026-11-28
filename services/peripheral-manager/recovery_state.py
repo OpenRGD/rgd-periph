@@ -14,7 +14,10 @@ import secrets
 import stat
 from datetime import datetime, timezone
 
-from contract_validation import validate_instance
+if __package__:
+    from .contract_validation import validate_instance
+else:
+    from contract_validation import validate_instance
 
 VERSION = "periph.recovery.v0.1-candidate"
 EPOCH_STRIDE = 1 << 32

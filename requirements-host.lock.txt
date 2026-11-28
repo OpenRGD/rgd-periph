@@ -1,0 +1,10 @@
+# Complete Python 3.12 / Linux x86_64 dependency version set from 01D CI.
+# Install wheel-only, no deps resolution; release artifact hashes are recorded.
+attrs==26.1.0
+jsonschema==4.23.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rfc3339-validator==0.1.4
+rpds-py==2026.9.1
+six==1.17.0
+typing-extensions==4.16.0

@@ -16,10 +16,16 @@ import sys
 import time
 from uuid import uuid4
 
-from contract_validation import validate_instance
-from host_broker import (CLIENT_TIMEOUT_SEC, MAX_MESSAGE, RESULT_SCHEMA, SCHEMA,
-                         SAFE_ID, SAFE_UNIT, peer_allowed, read_frame, remaining,
-                         send_frame, socket_path, strict_json)
+if __package__:
+    from .contract_validation import validate_instance
+    from .host_broker import (CLIENT_TIMEOUT_SEC, MAX_MESSAGE, RESULT_SCHEMA, SCHEMA,
+                              SAFE_ID, SAFE_UNIT, peer_allowed, read_frame, remaining,
+                              send_frame, socket_path, strict_json)
+else:
+    from contract_validation import validate_instance
+    from host_broker import (CLIENT_TIMEOUT_SEC, MAX_MESSAGE, RESULT_SCHEMA, SCHEMA,
+                             SAFE_ID, SAFE_UNIT, peer_allowed, read_frame, remaining,
+                             send_frame, socket_path, strict_json)
 
 
 EXIT_UNCONFIRMED = 3
@@ -163,10 +169,14 @@ def main(argv=None) -> int:
     return execute(args)
 
 
-if __name__ == "__main__":
+def entrypoint():
     try:
-        sys.exit(main())
+        return main()
     except IPC_ERRORS as error:
         print(f"PERIPH-0.2 client: {type(error).__name__}; outcome unconfirmed; reconcile status before any retry",
               file=sys.stderr)
-        sys.exit(1)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(entrypoint())

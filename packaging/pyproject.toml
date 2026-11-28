@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rgd-periph-host"
+version = "0.1.0a1"
+description = "OpenRGD local peripheral host broker and operator CLI, candidate only"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["jsonschema==4.23.0", "rfc3339-validator==0.1.4"]
+
+[project.scripts]
+rgd-periph-broker = "rgd_periph_host.host_broker:entrypoint"
+rgd-periph-control = "rgd_periph_host.control_cli:entrypoint"
+
+[tool.setuptools]
+packages = ["rgd_periph_host"]
+
+[tool.setuptools.package-data]
+rgd_periph_host = ["schemas/*.json"]
